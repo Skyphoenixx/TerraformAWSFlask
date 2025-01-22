@@ -13,9 +13,35 @@ on:
         default: 'apply'
 
 jobs:
+  terraform-destroy:
+    name: Destroy Terraform Resources
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.action == 'destroy' }}
+    steps:
+      - name: Checkout Terraform Repository
+        uses: actions/checkout@v3
+        with:
+          repository: Skyphoenixx/SimpleTerraformAWSProj
+          token: ${{ secrets.GIT_TOKEN }}
+          path: terraform-repo
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: terraform-repo/infra
+
+      - name: Terraform Destroy
+        run: terraform destroy --auto-approve
+        working-directory: terraform-repo/infra
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+
   python-tests:
     name: Run Python Tests
-    needs: terraform-apply
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.action == 'apply' || github.event.action == 'trigger_full_pipeline' }}
     steps:
@@ -42,36 +68,9 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}/python-repo
         run: pytest python-repo
 
-  terraform-destroy:
-    name: Destroy Terraform Resources
-    runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.action == 'destroy'}}
-    steps:
-      - name: Checkout Terraform Repository
-        uses: actions/checkout@v3
-        with:
-          repository: Skyphoenixx/SimpleTerraformAWSProj
-          token: ${{ secrets.GIT_TOKEN }}
-          path: terraform-repo
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-
-      - name: Terraform Init
-        run: terraform init
-        working-directory: terraform-repo/infra
-
-      - name: Terraform Destroy
-        run: terraform destroy --auto-approve
-        working-directory: terraform-repo/infra
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
-
   terraform-apply:
     name: Apply Terraform Resources
-    needs: terraform-destroy
+    needs: python-tests
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.action == 'apply' || github.event.action == 'trigger_full_pipeline' }}
     steps:
@@ -99,7 +98,7 @@ jobs:
 
   sonar-cloud-scan-python:
     name: SonarCloud Analysis for Python Project
-    needs: python-tests
+    needs: terraform-apply
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.action == 'apply' || github.event.action == 'trigger_full_pipeline' }}
     steps:
@@ -121,17 +120,17 @@ jobs:
             -Dsonar.projectKey=Skyphoenixx_PythonFlaskApi
 
   sonar-cloud-scan-terraform:
-    name: SonarCloud Analysis
-    needs: python-tests
+    name: SonarCloud Analysis for Terraform Project
+    needs: sonar-cloud-scan-python
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.action == 'apply' || github.event.action == 'trigger_full_pipeline' }}
     steps:
-      - name: Checkout Python Repository for Terraform Project
+      - name: Checkout Terraform Repository
         uses: actions/checkout@v3
         with:
           repository: Skyphoenixx/SimpleTerraformAWSProj
           token: ${{ secrets.GIT_TOKEN }}
-          path: python-repo
+          path: terraform-repo
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
