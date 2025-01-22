@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: 'Specify action: full_pipeline or destroy'
+        description: 'Specify action: apply or destroy'
         required: true
         default: 'apply'
 
