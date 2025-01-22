@@ -98,7 +98,7 @@ jobs:
       AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
 
   sonar-cloud-scan-python:
-    name: SonarCloud Analysis
+    name: SonarCloud Analysis for Python Project
     needs: python-tests
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.action == 'apply' || github.event.action == 'trigger_full_pipeline' }}
@@ -126,7 +126,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.action == 'apply' || github.event.action == 'trigger_full_pipeline' }}
     steps:
-      - name: Checkout Python Repository
+      - name: Checkout Python Repository for Terraform Project
         uses: actions/checkout@v3
         with:
           repository: Skyphoenixx/SimpleTerraformAWSProj
