@@ -102,7 +102,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.action == 'apply' || github.event.action == 'trigger_full_pipeline' }}
     steps:
-      - name: Checkout Python Repository
+      - name: Checkout Terraform Repository
         uses: actions/checkout@v3
         with:
           repository: Skyphoenixx/PythonFlaskApi
@@ -110,14 +110,13 @@ jobs:
           path: python-repo
 
       - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v4
         env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: 'https://sonarcloud.io'
         with:
           args: >
-            -Dsonar.organization=skyphoenixx
-            -Dsonar.projectKey=Skyphoenixx_PythonFlaskApi
+            -Dsonar.projectBaseDir=python-repo
 
   sonar-cloud-scan-terraform:
     name: SonarCloud Analysis for Terraform Project
@@ -131,10 +130,6 @@ jobs:
           repository: Skyphoenixx/SimpleTerraformAWSProj
           token: ${{ secrets.GIT_TOKEN }}
           path: terraform-repo
-
-      - name: Verify sonar-project.properties
-        run: ls -al terraform-repo/sonar-project.properties
-
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v4
