@@ -132,8 +132,15 @@ jobs:
           token: ${{ secrets.GIT_TOKEN }}
           path: terraform-repo
 
+      - name: Verify sonar-project.properties
+        run: ls -al terraform-repo/sonar-project.properties
+
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: 'https://sonarcloud.io'
+        with:
+          args: >
+            -Dsonar.projectBaseDir=terraform-repo
