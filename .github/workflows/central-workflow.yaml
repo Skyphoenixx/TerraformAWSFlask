@@ -132,6 +132,12 @@ jobs:
           token: ${{ secrets.GIT_TOKEN }}
           path: terraform-repo
 
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
       - name: SonarCloud Scan
         uses: sonarsource/sonarqube-scan-action@v1
         env:
