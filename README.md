@@ -48,7 +48,7 @@ This repository uses GitHub Actions to manage the CI/CD process and the workflow
     - Performs static code analysis on the PythonFlaskApi project to ensure code quality.
 
 The following diagram illustrates the CI/CD workflow:
-![CICD_Workflow.png](CICD_Workflow.png)
+![CICD_Workflow.png](CICD_Workflow_updated.png)
 
 ## Linked Repositories
 - **[SimpleTerraformAWSProj](https://github.com/Skyphoenixx/SimpleTerraformAWSProj):** Manages the Terraform configuration and AWS resource provisioning.
